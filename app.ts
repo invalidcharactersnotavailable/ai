@@ -1,43 +1,30 @@
-import { NeuralNetwork } from './neuralNetwork';
-import * as fs from 'fs';
-import * as path from 'path';
+import { NeuralNetwork } from './core/NeuralNetwork';
+import { Trainer } from './training/Trainer';
+import { Adam } from './core/Optimizer';
+import { MSELoss } from './core/Loss';
+import { Dataset } from './data/Dataset';
+import { ReLU } from './core/Activation';
 
-function wordToInput(word: string): number[] {
-    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-    return word.toLowerCase().split('').map(char => alphabet.indexOf(char) / 26);
-}
+// Create and prepare dataset
+const trainingData = new Dataset([
+  { input: [0, 0], target: [0] },
+  { input: [0, 1], target: [1] },
+  { input: [1, 0], target: [1] },
+  { input: [1, 1], target: [0] },
+]);
+trainingData.normalize();
 
-function outputToWord(output: number[]): string {
-    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-    return output.map(val => alphabet[Math.floor(val * 26)]).join('');
-}
+// Initialize model with proper configuration
+const model = new NeuralNetwork([2, 4, 1], new ReLU());
+const optimizer = new Adam(0.001);
+const trainer = new Trainer(model, new MSELoss(), optimizer);
 
-function loadTrainingData(folderPath: string): { input: string, output: string }[] {
-    const trainingData: { input: string, output: string }[] = [];
-    const files = fs.readdirSync(folderPath);
+// Train the model
+trainer.train(trainingData, 2000, 2);
 
-    for (const file of files) {
-        if (path.extname(file) === '.txt') {
-            const content = fs.readFileSync(path.join(folderPath, file), 'utf-8');
-            const lines = content.split('\n');
-            for (let i = 0; i < lines.length - 1; i += 2) {
-                trainingData.push({
-                    input: lines[i].trim(),
-                    output: lines[i + 1].trim()
-                });
-            }
-        }
-    }
-
-    return trainingData;
-}
-
-const nn = new NeuralNetwork(128, 512, 128);
-const trainingData = loadTrainingData('./trainingData');
-
-for (let i = 0; i < 10000; i++) {
-    const data = trainingData[Math.floor(Math.random() * trainingData.length)];
-    nn.train(wordToInput(data.input), wordToInput(data.output));
-}
-
-console.log(outputToWord(nn.feedforward(wordToInput('hello'))));
+// Test predictions
+console.log('XOR Predictions:');
+trainingData.data.forEach((dataPoint, idx) => {
+  const prediction = model.forward(dataPoint.input)[0];
+  console.log(`Input: [${dataPoint.input}] => ${prediction.toFixed(4)}`);
+});
