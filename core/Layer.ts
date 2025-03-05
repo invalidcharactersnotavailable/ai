@@ -1,7 +1,8 @@
-import { ActivationFunction } from './Activation';
+import type { ActivationFunction } from './Activation';
 import { MathUtils } from '../utils/MathUtils';
-import { Optimizer } from './Optimizer';
+import type { Optimizer } from './Optimizer';
 import { ReLU, Sigmoid } from './Activation';
+import { Hyperparams } from '../config/Hyperparams';
 
 export class Layer {
   weights: number[][];
@@ -13,8 +14,8 @@ export class Layer {
     public outputSize: number,
     activation: ActivationFunction = new Sigmoid()
   ) {
-    // He initialization for ReLU
-    const scale = activation instanceof ReLU ? Math.sqrt(2 / inputSize) : 0.1;
+    const scale = activation instanceof ReLU ? 
+      Math.sqrt(2 / inputSize) : Hyperparams.initializationScale;
     this.weights = MathUtils.randomMatrix(outputSize, inputSize, scale);
     this.biases = new Array(outputSize).fill(0);
     this.activation = activation;

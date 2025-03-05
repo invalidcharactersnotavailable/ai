@@ -1,9 +1,11 @@
+import { Hyperparams } from '../config/Hyperparams';
+
 export abstract class Optimizer {
   abstract update(weights: number[][], biases: number[]): void;
 }
 
 export class SGD extends Optimizer {
-  constructor(private learningRate: number = 0.01) {
+  constructor(private learningRate: number = Hyperparams.learningRate) {
     super();
   }
 
@@ -25,10 +27,10 @@ export class Adam extends Optimizer {
   private t = 0;
 
   constructor(
-    private learningRate: number = 0.001,
-    private beta1: number = 0.9,
-    private beta2: number = 0.999,
-    private epsilon: number = 1e-8
+    private learningRate: number = Hyperparams.learningRate,
+    private beta1: number = Hyperparams.adamBeta1,
+    private beta2: number = Hyperparams.adamBeta2,
+    private epsilon: number = Hyperparams.adamEpsilon
   ) {
     super();
   }

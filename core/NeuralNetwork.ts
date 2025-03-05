@@ -1,6 +1,6 @@
 import { Layer } from './Layer';
-import { ActivationFunction } from './Activation';
-import { Optimizer } from './Optimizer';
+import type { ActivationFunction } from './Activation';
+import type { Optimizer } from './Optimizer';
 
 export class NeuralNetwork {
   public layers: Layer[];
