@@ -1,3 +1,5 @@
+import type { DataPoint } from "./Dataset";
+
 // data/Split.ts
 export class Split {
     static trainTestSplit(data: DataPoint[], testSize: number = 0.2): [DataPoint[], DataPoint[]] {

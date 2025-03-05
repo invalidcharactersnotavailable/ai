@@ -1,6 +1,7 @@
+// utils/FileIO.ts
 import { NeuralNetwork } from '../core/NeuralNetwork';
 import { Layer } from '../core/Layer';
-import { ReLU, Sigmoid } from '../core/Activation';
+import { LeakyReLU, Sigmoid } from '../core/Activation'; // Changed from ReLU to LeakyReLU
 
 export class FileIO {
   static async saveModel(model: NeuralNetwork, path: string): Promise<void> {
@@ -22,7 +23,7 @@ export class FileIO {
       const newLayer = new Layer(0, 0);
       newLayer.weights = layer.weights;
       newLayer.biases = layer.biases;
-      newLayer.activation = layer.activation === 'ReLU' ? new ReLU() : new Sigmoid();
+      newLayer.activation = layer.activation === 'LeakyReLU' ? new LeakyReLU() : new Sigmoid();
       return newLayer;
     });
     

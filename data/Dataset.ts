@@ -1,3 +1,4 @@
+// data/Dataset.ts
 export type DataPoint = {
   input: number[];
   target: number[];
@@ -17,6 +18,7 @@ export class Dataset {
     const numFeatures = this.data[0].input.length;
     const means = Array(numFeatures).fill(0);
     const stds = Array(numFeatures).fill(0);
+    const eps = 1e-8;
 
     this.data.forEach(({ input }) => {
       input.forEach((val, i) => means[i] += val);
@@ -26,12 +28,12 @@ export class Dataset {
     this.data.forEach(({ input }) => {
       input.forEach((val, i) => stds[i] += Math.pow(val - means[i], 2));
     });
-    stds.forEach((_, i) => stds[i] = Math.sqrt(stds[i] / this.data.length));
+    stds.forEach((_, i) => 
+      stds[i] = Math.sqrt(stds[i] / this.data.length + eps)
+    );
 
     this.data = this.data.map(({ input, target }) => ({
-      input: input.map((val, i) => 
-        stds[i] !== 0 ? (val - means[i]) / stds[i] : 0
-      ),
+      input: input.map((val, i) => (val - means[i]) / stds[i]),
       target
     }));
   }

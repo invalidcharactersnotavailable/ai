@@ -1,11 +1,9 @@
-import { Hyperparams } from './config/Hyperparams';
+// app.ts
 import { NeuralNetwork } from './core/NeuralNetwork';
 import { Trainer } from './training/Trainer';
 import { Adam } from './core/Optimizer';
-import { MSELoss } from './core/Loss';
+import { CrossEntropyLoss } from './core/Loss';
 import { Dataset } from './data/Dataset';
-import { ReLU } from './core/Activation';
-import { Evaluator } from './training/Evaluator';
 
 // Initialize dataset
 const trainingData = new Dataset([
@@ -16,27 +14,24 @@ const trainingData = new Dataset([
 ]);
 trainingData.normalize();
 
-// Initialize model with hyperparameters
-const model = new NeuralNetwork(
-  [Hyperparams.inputSize, Hyperparams.hiddenSize, Hyperparams.outputSize],
-  new ReLU()
-);
-
+// Initialize model and trainer
+const model = new NeuralNetwork([2, 4, 1]);
 const optimizer = new Adam();
-const trainer = new Trainer(model, new MSELoss(), optimizer);
+const trainer = new Trainer(model, new CrossEntropyLoss(), optimizer);
 
-// Train the model
-trainer.train(trainingData, Hyperparams.epochs);
+// Train
+trainer.train(trainingData);
 
-// Evaluate results
-const metrics = Evaluator.evaluate(model, trainingData.data);
-console.log(`Training Accuracy: ${(metrics.accuracy * 100).toFixed(1)}%`);
-console.log(`Final Loss: ${metrics.loss.toFixed(4)}`);
-
-// Test predictions
-trainingData.data.forEach((dataPoint, index) => {
-  const prediction = model.forward(dataPoint.input)[0];
-  console.log(
-    `Input: [${dataPoint.input.map(x => x.toFixed(1))}] => ${prediction.toFixed(4)}`
-  );
+// Test
+console.log('XOR Predictions:');
+trainingData.data.forEach(dataPoint => {
+  try {
+    const prediction = model.forward(dataPoint.input)[0];
+    console.log(
+      `Input: [${dataPoint.input.map(x => x.toFixed(2))}] =>`,
+      `${prediction.toFixed(4)} (${prediction > 0.5 ? '1' : '0'})`
+    );
+  } catch (error) {
+    console.error('Prediction failed:', error);
+  }
 });

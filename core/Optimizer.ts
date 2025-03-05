@@ -1,22 +1,14 @@
-import { Hyperparams } from '../config/Hyperparams';
+// core/Optimizer.ts
+import { Hyperparams } from "./Hyperparams";
 
 export abstract class Optimizer {
-  abstract update(weights: number[][], biases: number[]): void;
-}
-
-export class SGD extends Optimizer {
-  constructor(private learningRate: number = Hyperparams.learningRate) {
-    super();
-  }
-
-  update(weights: number[][], biases: number[]): void {
-    weights.forEach(row => 
-      row.forEach((_, i) => row[i] -= this.learningRate * row[i])
-    );
-    biases.forEach((_, i) => 
-      biases[i] -= this.learningRate * biases[i]
-    );
-  }
+  abstract update(
+    weights: number[][],
+    biases: number[],
+    weightGrads: number[][],
+    biasGrads: number[]
+  ): void;
+  learningRate: number = Hyperparams.learningRate;
 }
 
 export class Adam extends Optimizer {
@@ -27,7 +19,7 @@ export class Adam extends Optimizer {
   private t = 0;
 
   constructor(
-    private learningRate: number = Hyperparams.learningRate,
+    public learningRate: number = Hyperparams.learningRate,
     private beta1: number = Hyperparams.adamBeta1,
     private beta2: number = Hyperparams.adamBeta2,
     private epsilon: number = Hyperparams.adamEpsilon
@@ -35,9 +27,14 @@ export class Adam extends Optimizer {
     super();
   }
 
-  update(weights: number[][], biases: number[]): void {
+  update(
+    weights: number[][],
+    biases: number[],
+    weightGrads: number[][],
+    biasGrads: number[]
+  ): void {
     this.t++;
-    
+
     if (this.mWeights.length === 0) {
       this.mWeights = weights.map(row => row.map(() => 0));
       this.vWeights = weights.map(row => row.map(() => 0));
@@ -45,10 +42,12 @@ export class Adam extends Optimizer {
       this.vBiases = biases.map(() => 0);
     }
 
+    // Update weights
     weights.forEach((row, i) => {
       row.forEach((_, j) => {
-        this.mWeights[i][j] = this.beta1 * this.mWeights[i][j] + (1 - this.beta1) * weights[i][j];
-        this.vWeights[i][j] = this.beta2 * this.vWeights[i][j] + (1 - this.beta2) * weights[i][j] ** 2;
+        const g = Math.max(-5, Math.min(5, weightGrads[i][j]));
+        this.mWeights[i][j] = this.beta1 * this.mWeights[i][j] + (1 - this.beta1) * g;
+        this.vWeights[i][j] = this.beta2 * this.vWeights[i][j] + (1 - this.beta2) * g ** 2;
         
         const mHat = this.mWeights[i][j] / (1 - Math.pow(this.beta1, this.t));
         const vHat = this.vWeights[i][j] / (1 - Math.pow(this.beta2, this.t));
@@ -57,9 +56,11 @@ export class Adam extends Optimizer {
       });
     });
 
+    // Update biases
     biases.forEach((_, i) => {
-      this.mBiases[i] = this.beta1 * this.mBiases[i] + (1 - this.beta1) * biases[i];
-      this.vBiases[i] = this.beta2 * this.vBiases[i] + (1 - this.beta2) * biases[i] ** 2;
+      const g = Math.max(-5, Math.min(5, biasGrads[i]));
+      this.mBiases[i] = this.beta1 * this.mBiases[i] + (1 - this.beta1) * g;
+      this.vBiases[i] = this.beta2 * this.vBiases[i] + (1 - this.beta2) * g ** 2;
       
       const mHat = this.mBiases[i] / (1 - Math.pow(this.beta1, this.t));
       const vHat = this.vBiases[i] / (1 - Math.pow(this.beta2, this.t));

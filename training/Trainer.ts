@@ -1,22 +1,26 @@
+// training/Trainer.ts
 import { NeuralNetwork } from '../core/NeuralNetwork';
 import { LossFunction } from '../core/Loss';
 import { Dataset } from '../data/Dataset';
-import { Optimizer } from '../core/Optimizer';
-import { Hyperparams } from '../config/Hyperparams';
+import { Adam } from '../core/Optimizer';
+import { Hyperparams } from '../core/Hyperparams';
 
 export class Trainer {
   constructor(
     private model: NeuralNetwork,
     private loss: LossFunction,
-    private optimizer: Optimizer
+    private optimizer: Adam
   ) {}
 
-  train(dataset: Dataset, epochs: number, batchSize: number = Hyperparams.batchSize) {
-    for (let epoch = 0; epoch < epochs; epoch++) {
-      const batches = dataset.createBatches(batchSize);
+  train(dataset: Dataset) {
+    for (let epoch = 0; epoch < Hyperparams.epochs; epoch++) {
+      const batches = dataset.createBatches(Hyperparams.batchSize);
+      
       for (const batch of batches) {
         let totalLoss = 0;
         
+        this.model.backward([]); // Initialize gradients
+
         for (const dataPoint of batch) {
           const output = this.model.forward(dataPoint.input);
           totalLoss += this.loss.calculate(output, dataPoint.target);
@@ -24,16 +28,12 @@ export class Trainer {
           this.model.backward(gradient);
         }
 
-        this.model.layers.forEach(layer => {
-          layer.weights = layer.weights.map(row => 
-            row.map(w => Math.max(
-              -Hyperparams.gradientClipRange, 
-              Math.min(Hyperparams.gradientClipRange, w)
-            ))
-          );
-        });
-
         this.model.updateWeights(this.optimizer);
+        
+        // Learning rate decay
+        if (epoch % 1000 === 0) {
+          this.optimizer.learningRate *= 0.9;
+        }
       }
     }
   }

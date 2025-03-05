@@ -1,15 +1,20 @@
+// core/Activation.ts
+import { Hyperparams } from './Hyperparams'; // Add this import
+
 export interface ActivationFunction {
   forward(inputs: number[]): number[];
-  backward(gradients: number[]): number[];
+  backward(gradients: number[], outputs: number[]): number[];
 }
 
-export class ReLU implements ActivationFunction {
+export class LeakyReLU implements ActivationFunction {
   forward(inputs: number[]): number[] {
-    return inputs.map(x => Math.max(0, x));
+    return inputs.map(x => Math.max(x * Hyperparams.leakyReluAlpha, x));
   }
 
-  backward(gradients: number[]): number[] {
-    return gradients.map(g => g > 0 ? 1 : 0);
+  backward(gradients: number[], outputs: number[]): number[] {
+    return outputs.map((o, i) => 
+      o > 0 ? gradients[i] : Hyperparams.leakyReluAlpha * gradients[i]
+    );
   }
 }
 
@@ -18,8 +23,10 @@ export class Sigmoid implements ActivationFunction {
     return inputs.map(x => 1 / (1 + Math.exp(-x)));
   }
 
-  backward(gradients: number[]): number[] {
-    const outputs = this.forward(gradients);
-    return outputs.map(g => g * (1 - g));
+  backward(gradients: number[], outputs: number[]): number[] {
+    return outputs.map((o, i) => {
+      const grad = gradients[i];
+      return grad * o * (1 - o) + Hyperparams.epsilon;
+    });
   }
 }
