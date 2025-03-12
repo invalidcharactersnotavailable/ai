@@ -1,5 +1,8 @@
 # dependencies (bun install)
 node_modules
+training_data
+model_caches
+models
 
 # output
 out
