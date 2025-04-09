@@ -31,13 +31,13 @@ Scrapes data from Project Gutenberg. The `[count]` argument specifies the number
 
 ### 5. Sanitize Text Data
 ```bash
-bun sanitize --input [input_file] --output [output_file]
+bun sanitize
 ```
 Sanitizes text data by removing unwanted characters, formatting, or non-text elements. Useful for cleaning up raw text data before use in training.
 
 ### 6. Convert Text to Training Data
 ```bash
-bun convert --input [input_file] --output [output_file]
+bun convert
 ```
 Converts raw text files into training data format. This allows you to use books or other text sources as input for model training.
 
