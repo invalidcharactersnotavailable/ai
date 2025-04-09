@@ -25,11 +25,24 @@ Runs the model in the terminal with chatting and reinforcement training. This al
 
 ### 4. Scrape Data from Project Gutenberg
 ```bash
-bun scrape --count 0
+bun scrape --count [count]
 ```
-Scrapes data from Project Gutenberg. The `--count 0` argument specifies scraping an unlimited number of texts (or a default number if interpreted that way).
+Scrapes data from Project Gutenberg. The `[count]` argument specifies the number of texts to scrape. Set a finite number to limit the scrape, for example, `--count 100` to scrape 100 texts.
+
+### 5. Sanitize Text Data
+```bash
+bun sanitize --input [input_file] --output [output_file]
+```
+Sanitizes text data by removing unwanted characters, formatting, or non-text elements. Useful for cleaning up raw text data before use in training.
+
+### 6. Convert Text to Training Data
+```bash
+bun convert --input [input_file] --output [output_file]
+```
+Converts raw text files into training data format. This allows you to use books or other text sources as input for model training.
 
 ## Notes
 - Make sure to adjust the number of workers for optimal training based on your system capabilities.
 - Reinforcement training can help improve the model over time, but it's important to define appropriate rewards and punishments for better results.
-- The scraper can be used to gather books and texts for training or other purposes.
+- The scraper can be used to gather books and texts for training or other purposes, with finite count control via `--count`.
+- Use the sanitizer to clean your text data before converting it to training data format.
