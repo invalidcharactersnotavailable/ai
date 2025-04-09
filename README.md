@@ -1,15 +1,9 @@
 # ai
-
-To install dependencies:
-
-```bash
-bun install
-```
-
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.2.5. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+train
+`bun train --workers [workers]`
+start training a model on training data. `--workers` specifies the amount of workers.
+chat
+`bun chat`
+runs the model in the terminal with chatting
+`bun chat --train`
+runs the model in the terminal with chatting with reinforcement training with rewarding and punishing.
