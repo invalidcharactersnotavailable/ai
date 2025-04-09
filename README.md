@@ -1,8 +1,3 @@
-
-# AI Command Guide
-
-This guide provides the basic commands for training and interacting with the AI model using the `bun` tool.
-
 ## Commands
 
 ### 1. Train a Model
