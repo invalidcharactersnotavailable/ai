@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import logging
+import pickle
 # Import the TransformerModel, TransformerEncoderLayer, and Vocabulary classes from train_transformer.py
 from train_transformer import TransformerModel, TransformerEncoderLayer, Vocabulary
 
@@ -9,7 +10,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
 # Parameters
 MODEL_PATH = "transformer_model.keras"  # Path to the saved model
-MAX_SEQ_LEN = 256  # Maximum sequence length
+TOKENIZER_PATH = "tokenizer.pkl"  # Path to the saved tokenizer
+MAX_SEQ_LEN = 1024  # Maximum sequence length
 
 # Load the trained model
 def load_model():
@@ -18,6 +20,11 @@ def load_model():
     logging.info("Model loaded successfully.")
     return model
 
+# Load the tokenizer
+with open(TOKENIZER_PATH, "rb") as f:
+    vocab = pickle.load(f)
+logging.info(f"Tokenizer loaded from {TOKENIZER_PATH}")
+
 # Tokenize input text
 def tokenize(text):
     return text.lower().split()
@@ -25,6 +32,15 @@ def tokenize(text):
 # Pad sequences
 def pad_sequences(sequences, maxlen):
     return tf.keras.preprocessing.sequence.pad_sequences(sequences, maxlen=maxlen, padding='post', truncating='post')
+
+# Adjust inference to use the loaded tokenizer
+def infer(model, text):
+    tokens = tokenize(text)
+    encoded = [vocab.word2idx.get(word, vocab.word2idx["<unk>"]) for word in tokens]
+    padded = pad_sequences([encoded], maxlen=MAX_SEQ_LEN)
+    predictions = model.predict(padded)
+    response = decode_response(predictions, vocab)
+    return response
 
 # Updated chat function with context window and batching for efficiency
 def chat_with_model(model, vocab):
@@ -85,11 +101,6 @@ def decode_response(predictions, vocab, top_p=0.9, temperature=1.0):
 if __name__ == "__main__":
     # Load the model
     model = load_model()
-
-    # Example vocabulary (replace with actual vocabulary used during training)
-    vocab = Vocabulary()
-    vocab.word2idx = {"<pad>": 0, "<unk>": 1, "hello": 2, "world": 3}  # Example mapping
-    vocab.idx2word = ["<pad>", "<unk>", "hello", "world"]
 
     # Start chat session
     chat_with_model(model, vocab)

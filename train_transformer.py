@@ -5,6 +5,7 @@ from tensorflow.keras.layers import Embedding, Dense, LayerNormalization, MultiH
 from tensorflow.keras.models import Model
 from tensorflow.keras.saving import register_keras_serializable
 import logging
+import pickle
 
 # Simplified parameter configuration
 DATA_FOLDER = "dataset/data"  # Folder containing .txt files
@@ -262,6 +263,12 @@ if __name__ == "__main__":
             except Exception as e:
                 logging.warning(f"Skipping file {filename} due to encoding issues: {e}")
     vocab.build_vocab()  # Limit vocabulary size
+
+    # Save the tokenizer
+    TOKENIZER_PATH = "tokenizer.pkl"
+    with open(TOKENIZER_PATH, "wb") as f:
+        pickle.dump(vocab, f)
+    logging.info(f"Tokenizer saved to {TOKENIZER_PATH}")
 
     # Load and preprocess data
     samples = load_data(DATA_FOLDER, vocab)

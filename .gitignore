@@ -1,2 +1,3 @@
 checkpoints/
-dataset/data/
+dataset/data/*
+*.keras
